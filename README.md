@@ -79,3 +79,47 @@ Heat the temperature sensor → fan speed increases automatically.
 When temp > 65°C, buzzer and red LED activate.
 
 When temp < 20°C, rotate the encoder to manually adjust speed.
+
+## 📁 Code Structure
+
+```
+Core/
+├── Src/
+│   ├── main.c          # 主循环：ADC读取、模式切换、OLED更新
+│   ├── Motor.c         # 直流电机PWM控制（25kHz）
+│   ├── Encoder.c       # 带消抖的旋转编码器读取
+│   ├── ADC.c           # ADC初始化与值获取
+│   ├── OLED.c          # 显示驱动（I2C）
+│   ├── TIMER.c         # 定时器2中断蜂鸣器（中央C音）
+│   └── Delay.c         # 软件延时工具
+└── Inc/
+    └── (对应的头文件)
+```
+## 🔑 Key Algorithm
+
+### Temperature-to-Speed Mapping (Auto Mode)
+```c
+if (Voltage > 25) {
+    Speed = Voltage;              // 线性映射
+    if (Speed >= 100) Speed = 99; // 边界钳位
+}
+```
+
+### Encoder Manual Override (Temp < 20°C)
+```c
+Speed += 4 * Encoder_Get();       // 步进增减
+```
+
+### Buzzer Interrupt (TIM2)
+```c
+ARR = 190 → 产生 ~1kHz 音调（中央C）
+仅在 flag == 1（温度 > 65°C）时触发
+```
+## 📄 License
+
+本项目采用 MIT 许可
+
+## 👤 作者
+
+邹志伟  
+邮箱：13336654697@163.com  
